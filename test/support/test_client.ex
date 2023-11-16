@@ -20,19 +20,19 @@ defmodule Tesla.Middleware.Support.TestClient do
     {status, headers, body} =
       case {env.url, env.query} do
         {"/200_OK", []} ->
-          {200, %{'Content-Type' => 'text/plain'}, "OK"}
+          {200, %{~c"Content-Type" => ~c"text/plain"}, "OK"}
 
         {"/200_OK", [param: "a"]} ->
-          {200, %{'Content-Type' => 'text/plain'}, "OK a"}
+          {200, %{~c"Content-Type" => ~c"text/plain"}, "OK a"}
 
         {"/200_OK", [param: "b"]} ->
-          {200, %{'Content-Type' => 'text/plain'}, "OK b"}
+          {200, %{~c"Content-Type" => ~c"text/plain"}, "OK b"}
 
         {"/400_BAD_REQUEST", _} ->
-          {400, %{'Content-Type' => 'text/plain'}, "Bad Request"}
+          {400, %{~c"Content-Type" => ~c"text/plain"}, "Bad Request"}
 
         {"/500_INTERNAL_SERVER_ERROR", _} ->
-          {500, %{'Content-Type' => 'text/plain'}, "Internal Server Error"}
+          {500, %{~c"Content-Type" => ~c"text/plain"}, "Internal Server Error"}
       end
 
     {:ok, %{env | status: status, headers: headers, body: body}}

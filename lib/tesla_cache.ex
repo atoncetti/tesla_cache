@@ -6,9 +6,11 @@ defmodule Tesla.Middleware.Cache do
   def call(env, next, opts) do
     ttl = Keyword.fetch!(opts, :ttl)
     cache_key_generator = Keyword.get(opts, :cache_key_generator, &default_cache_key/1)
+    cache_validator = Keyword.get(opts, :cache_validator, &default_cache_validator/1)
 
     env
     |> get_from_cache(env.method, cache_key_generator)
+    |> validate_cache(cache_validator)
     |> run(next)
     |> set_to_cache(ttl, cache_key_generator)
   end
@@ -18,6 +20,9 @@ defmodule Tesla.Middleware.Cache do
   end
 
   defp get_from_cache(env, _method, _cache_key_generator), do: {nil, env}
+
+  defp validate_cache({env_from_cache, request_env}, cache_validator),
+    do: {cache_validator.(env_from_cache), request_env}
 
   defp run({nil, request_env}, next) do
     {:ok, response_env} = Tesla.run(request_env, next)
@@ -44,4 +49,6 @@ defmodule Tesla.Middleware.Cache do
     do: {:ok, response_env}
 
   defp default_cache_key(%Tesla.Env{url: url, query: query}), do: Tesla.build_url(url, query)
+
+  defp default_cache_validator(result_from_cache), do: result_from_cache
 end
